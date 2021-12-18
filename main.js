@@ -1,8 +1,8 @@
-const apiKey = '61a6910de34a4e46cfe2f04eee862b72'
-const currencies = ['EUR', 'AED', 'GBP', 'INR', 'KWD'].toString()
+const apiKey = '3f047afd1dafd5e4b786b899'
+const currencies = ['EUR', 'AED', 'GBP', 'INR', 'KWD']
 const source = 'USD'
 
-const url = `http://apilayer.net/api/live?access_key=${apiKey}&currencies=${currencies}&source=${source}&format=1`
+const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${source}`
 const exchangeRates = {}
 const time = new Date()
 
@@ -28,7 +28,13 @@ if (myStorage) {
     fetch(url)
         .then((res) => res.json())
         .then((data) => {
-            exchangeRates[0] = data['quotes']
+            exchangeRates[0] = {
+                USDEUR: data['conversion_rates']['EUR'],
+                USDAED: data['conversion_rates']['AED'],
+                USDGBP: data['conversion_rates']['GBP'],
+                USDINR: data['conversion_rates']['INR'],
+                USDKWD: data['conversion_rates']['KWD'],
+            }
             localStorage.setItem('exchangeRates', JSON.stringify(exchangeRates))
         })
     console.log(calcTime(), '-- Refreshed Data!!!')
@@ -38,7 +44,13 @@ function onRefreshClick() {
     fetch(url)
         .then((res) => res.json())
         .then((data) => {
-            exchangeRates[0] = data['quotes']
+            exchangeRates[0] = {
+                USDEUR: data['conversion_rates']['EUR'],
+                USDAED: data['conversion_rates']['AED'],
+                USDGBP: data['conversion_rates']['GBP'],
+                USDINR: data['conversion_rates']['INR'],
+                USDKWD: data['conversion_rates']['KWD'],
+            }
             localStorage.setItem('exchangeRates', JSON.stringify(exchangeRates))
         })
     console.log(calcTime(), '-- Refreshed Data!!!')
