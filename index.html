@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Currency Converter</title>
+        <link rel="shortcut icon" href="./img/icon.png" type="image/x-icon">
+        <link rel="stylesheet" href="./style.css" />
+    </head>
+    <body>
+        <div id="root">
+            <img src="./img/icon.png" alt="logo">
+            <h1 id="header">Currency Converter</h1>
+            <div id="fields">
+                <div>
+                    <select name="currencyFrom" id="from">
+                        <option value="usd" selected>USD</option>
+                        <option value="eur">EUR</option>
+                        <option value="aed">AED</option>
+                        <option value="gbp">GBP</option>
+                        <option value="inr">INR</option>
+                        <option value="kwd">KWD</option>
+                    </select>
+                    <input id="input1" type="number" placeholder="USD" />
+                </div>
+                <div>
+                    <select name="currencyFrom" id="to">
+                        <option value="usd">USD</option>
+                        <option value="eur">EUR</option>
+                        <option value="aed">AED</option>
+                        <option value="gbp">GBP</option>
+                        <option value="inr" selected>INR</option>
+                        <option value="kwd">KWD</option>
+                    </select>
+                    <input id="input2" type="number" placeholder="INR" />
+                </div>
+                <button id="refreshBtn">Refresh Data</button>
+            </div>
+        </div>
+        <script src="./main.js"></script>
+    </body>
+</html>
