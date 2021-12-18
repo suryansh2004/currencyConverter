@@ -2,6 +2,8 @@ const apiKey = '3f047afd1dafd5e4b786b899'
 const currencies = ['EUR', 'AED', 'GBP', 'INR', 'KWD']
 const source = 'USD'
 
+console.log('MADE BY - SURYANSH PRIYADRASHI')
+
 const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${source}`
 const exchangeRates = {}
 const time = new Date()

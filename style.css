@@ -38,6 +38,7 @@ body {
 
 input {
     padding: 12px;
+    width: 180px;
     font-family: Poppins;
     font-size: 1rem;
     color: black;
