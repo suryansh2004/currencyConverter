@@ -15,7 +15,7 @@ function calcTime(extra = 0) {
     } else {
         minutes += extra
     }
-    return `${hours.toString().padStart(2, '0')}:${minutes
+    return `${Math.abs(hours).toString().padStart(2, '0')}:${minutes
         .toString()
         .padStart(2, '0')}`
 }
