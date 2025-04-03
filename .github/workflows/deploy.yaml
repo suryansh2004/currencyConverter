@@ -28,4 +28,34 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          whoami
+          echo "✅ Connected to EC2"
+
+          cd /etc/nginx/www/currencyConverter || { echo "❌ Directory not found!"; exit 1; }
+
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+          echo "📌 Current commit: $CURRENT_COMMIT"
+
+          if [[ -n "${{ github.event.inputs.rollback_commit }}" ]]; then
+            echo "🔄 Rolling back to commit: ${{ github.event.inputs.rollback_commit }}"
+            sudo git fetch
+            sudo git checkout ${{ github.event.inputs.rollback_commit }}
+          else
+            echo "🚀 Deploying latest code..."
+            sudo git checkout main
+            sudo git pull origin main
+          fi
+
+          sudo systemctl restart nginx || { echo "❌ Failed to restart Nginx"; exit 1; }
+
+          echo "🩺 Performing health check..."
+          if ! curl -s --max-time 10 http://localhost | grep -q "Currency Converter"; then
+            echo "❌ Health check failed! Rolling back..."
+            
+            sudo git reset --hard $CURRENT_COMMIT
+            sudo systemctl restart nginx
+            exit 1
+          else
+            echo "✅ Deployment successful!"
+          fi
+
+          echo "🏁 Deployment finished."
