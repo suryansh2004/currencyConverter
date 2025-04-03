@@ -30,39 +30,45 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -tt -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          set -e
+        ssh -tt -i ~/.ssh/id_rsa -o LogLevel=DEBUG -o ServerAliveInterval=10 -o ServerAliveCountMax=3 \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           
-          cd /etc/nginx/www/currencyConverter
-          
-          # Store the current commit hash before deploying
+          set -e  # Exit on error
+          echo "✅ Connected to EC2"
+
+          cd /etc/nginx/www/currencyConverter || { echo "❌ Directory not found!"; exit 1; }
+
+          # Store current commit hash before pulling new code
           CURRENT_COMMIT=$(git rev-parse HEAD)
-          
-          # Clone latest version or rollback
+          echo "📌 Current commit: $CURRENT_COMMIT"
+
+          # Fetch latest changes or rollback
           if [[ -n "${{ github.event.inputs.rollback_commit }}" ]]; then
-            sudo git fetch
-            sudo git checkout ${{ github.event.inputs.rollback_commit }}
+            echo "🔄 Rolling back to commit: ${{ github.event.inputs.rollback_commit }}"
+            git fetch
+            git checkout ${{ github.event.inputs.rollback_commit }}
           else
-            sudo git checkout main
-            sudo git pull origin main
-          fi
-          
-          # Restart Nginx
-          sudo systemctl restart nginx
-          
-          # Health Check
-          sleep 10
-          if ! curl -s --max-time 5 http://localhost | grep -q "Currency Converter"; then
-            echo "Health check failed! Rolling back..."
-            
-            # Reset to last working commit
-            sudo git reset --hard \$CURRENT_COMMIT
-            
-            # Restart Nginx again to apply rollback
-            sudo systemctl restart nginx
-          else
-            echo "Deployment successful!"
+            echo "🚀 Deploying latest code..."
+            git checkout main
+            git pull origin main
           fi
 
-          exit
+          # Restart Nginx
+          echo "🔄 Restarting Nginx..."
+          sudo systemctl restart nginx || { echo "❌ Failed to restart Nginx"; exit 1; }
+
+          # Health Check with timeout
+          echo "🩺 Performing health check..."
+          if ! curl -s --max-time 10 http://localhost | grep -q "Currency Converter"; then
+            echo "❌ Health check failed! Rolling back..."
+            
+            git reset --hard $CURRENT_COMMIT
+            sudo systemctl restart nginx
+            exit 1
+          else
+            echo "✅ Deployment successful!"
+          fi
+
+          echo "🏁 Deployment finished."
+          exit 0  # Ensure SSH session exits
         EOF
