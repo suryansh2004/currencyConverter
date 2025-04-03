@@ -45,12 +45,12 @@ jobs:
           # Fetch latest changes or rollback
           if [[ -n "${{ github.event.inputs.rollback_commit }}" ]]; then
             echo "🔄 Rolling back to commit: ${{ github.event.inputs.rollback_commit }}"
-            git fetch
-            git checkout ${{ github.event.inputs.rollback_commit }}
+            sudo git fetch
+            sudo git checkout ${{ github.event.inputs.rollback_commit }}
           else
             echo "🚀 Deploying latest code..."
-            git checkout main
-            git pull origin main
+            sudo git checkout main
+            sudo git pull origin main
           fi
 
           # Restart Nginx
@@ -62,7 +62,7 @@ jobs:
           if ! curl -s --max-time 10 http://localhost | grep -q "Currency Converter"; then
             echo "❌ Health check failed! Rolling back..."
             
-            git reset --hard $CURRENT_COMMIT
+            sudo git reset --hard $CURRENT_COMMIT
             sudo systemctl restart nginx
             exit 1
           else
