@@ -30,37 +30,4 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -tt -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          set -e
-          
-          cd /etc/nginx/www/currencyConverter
-          
-          # Store the current commit hash before deploying
-          CURRENT_COMMIT=\$(git rev-parse HEAD)
-          
-          # Clone latest version or rollback
-          if [[ -n "${{ github.event.inputs.rollback_commit }}" ]]; then
-            git fetch
-            git checkout ${{ github.event.inputs.rollback_commit }}
-          else
-            git checkout main
-            git pull origin main
-          fi
-          
-          # Restart Nginx
-          sudo systemctl restart nginx
-          
-          # Health Check
-          sleep 10
-          if ! curl -s --max-time 5 http://localhost | grep -q "Currency Converter"; then
-            echo "Health check failed! Rolling back..."
-            
-            # Reset to last working commit
-            git reset --hard \$CURRENT_COMMIT
-            
-            # Restart Nginx again to apply rollback
-            sudo systemctl restart nginx
-          else
-            echo "Deployment successful!"
-          fi
-        EOF
+        ssh -tt -i ~/.ssh/id_rsa ec2-user@54.234.135.34
