@@ -63,4 +63,6 @@ jobs:
           else
             echo "Deployment successful!"
           fi
+
+          exit
         EOF
