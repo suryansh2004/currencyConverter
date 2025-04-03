@@ -36,7 +36,7 @@ jobs:
           cd /etc/nginx/www/currencyConverter
           
           # Store the current commit hash before deploying
-          CURRENT_COMMIT=\$(git rev-parse HEAD)
+          CURRENT_COMMIT=$(git rev-parse HEAD)
           
           # Clone latest version or rollback
           if [[ -n "${{ github.event.inputs.rollback_commit }}" ]]; then
