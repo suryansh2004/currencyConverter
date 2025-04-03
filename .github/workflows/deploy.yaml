@@ -30,7 +30,7 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -tt ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        ssh -tt -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           set -e
           
           cd /etc/nginx/www/currencyConverter
