@@ -21,54 +21,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set up SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
     - name: Deploy to EC2
-      run: |
-        ssh -tt -i ~/.ssh/id_rsa -o LogLevel=DEBUG -o ServerAliveInterval=10 -o ServerAliveCountMax=3 \
-          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          
-          set -e  # Exit on error
-          echo "✅ Connected to EC2"
-
-          cd /etc/nginx/www/currencyConverter || { echo "❌ Directory not found!"; exit 1; }
-
-          # Store current commit hash before pulling new code
-          CURRENT_COMMIT=$(git rev-parse HEAD)
-          echo "📌 Current commit: $CURRENT_COMMIT"
-
-          # Fetch latest changes or rollback
-          if [[ -n "${{ github.event.inputs.rollback_commit }}" ]]; then
-            echo "🔄 Rolling back to commit: ${{ github.event.inputs.rollback_commit }}"
-            sudo git fetch
-            sudo git checkout ${{ github.event.inputs.rollback_commit }}
-          else
-            echo "🚀 Deploying latest code..."
-            sudo git checkout main
-            sudo git pull origin main
-          fi
-
-          # Restart Nginx
-          echo "🔄 Restarting Nginx..."
-          sudo systemctl restart nginx || { echo "❌ Failed to restart Nginx"; exit 1; }
-
-          # Health Check with timeout
-          echo "🩺 Performing health check..."
-          if ! curl -s --max-time 10 http://localhost | grep -q "Currency Converter"; then
-            echo "❌ Health check failed! Rolling back..."
-            
-            sudo git reset --hard $CURRENT_COMMIT
-            sudo systemctl restart nginx
-            exit 1
-          else
-            echo "✅ Deployment successful!"
-          fi
-
-          echo "🏁 Deployment finished."
-          exit 0  # Ensure SSH session exits
-        EOF
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          whoami
