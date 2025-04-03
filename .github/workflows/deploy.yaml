@@ -1,0 +1,66 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      rollback_commit:
+        description: "Commit SHA to rollback to (leave empty for latest)"
+        required: false
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to EC2
+      run: |
+        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          set -e
+          
+          cd /etc/nginx/www/currencyConverter
+          
+          # Store the current commit hash before deploying
+          CURRENT_COMMIT=\$(git rev-parse HEAD)
+          
+          # Clone latest version or rollback
+          if [[ -n "${{ github.event.inputs.rollback_commit }}" ]]; then
+            git fetch
+            git checkout ${{ github.event.inputs.rollback_commit }}
+          else
+            git checkout main
+            git pull origin main
+          fi
+          
+          # Restart Nginx
+          sudo systemctl restart nginx
+          
+          # Health Check
+          sleep 10
+          if ! curl -s --max-time 5 http://localhost | grep -q "Currency Converter"; then
+            echo "Health check failed! Rolling back..."
+            
+            # Reset to last working commit
+            git reset --hard \$CURRENT_COMMIT
+            
+            # Restart Nginx again to apply rollback
+            sudo systemctl restart nginx
+          else
+            echo "Deployment successful!"
+          fi
+        EOF
