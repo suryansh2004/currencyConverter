@@ -40,11 +40,11 @@ jobs:
           
           # Clone latest version or rollback
           if [[ -n "${{ github.event.inputs.rollback_commit }}" ]]; then
-            git fetch
-            git checkout ${{ github.event.inputs.rollback_commit }}
+            sudo git fetch
+            sudo git checkout ${{ github.event.inputs.rollback_commit }}
           else
-            git checkout main
-            git pull origin main
+            sudo git checkout main
+            sudo git pull origin main
           fi
           
           # Restart Nginx
@@ -56,7 +56,7 @@ jobs:
             echo "Health check failed! Rolling back..."
             
             # Reset to last working commit
-            git reset --hard \$CURRENT_COMMIT
+            sudo git reset --hard \$CURRENT_COMMIT
             
             # Restart Nginx again to apply rollback
             sudo systemctl restart nginx
