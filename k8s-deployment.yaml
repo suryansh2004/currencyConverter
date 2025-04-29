@@ -18,6 +18,7 @@ spec:
           image: suryansh2004/node-app:latest
           ports:
             - containerPort: 3000
+          imagePullPolicy: Always
 ---
 apiVersion: v1
 kind: Service

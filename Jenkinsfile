@@ -3,6 +3,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
         DOCKER_IMAGE = "suryansh2004/node-app"
+        KUBE_NAMESPACE = "default"
     }
     stages {
         stage('Checkout') {
@@ -25,7 +26,10 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                sh '/opt/homebrew/bin/kubectl apply -f k8s-deployment.yaml'
+                sh '''
+                sed -i "" "s|image: .*|image: $DOCKER_IMAGE:$BUILD_NUMBER|" k8s-deployment.yaml
+                /opt/homebrew/bin/kubectl apply -f k8s-deployment.yaml -n $KUBE_NAMESPACE
+                '''
             }
         }
     }
