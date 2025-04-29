@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s-deployment.yaml'
+                sh '/opt/homebrew/bin/kubectl apply -f k8s-deployment.yaml'
             }
         }
     }
