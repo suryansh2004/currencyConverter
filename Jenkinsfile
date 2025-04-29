@@ -5,6 +5,12 @@ pipeline {
         DOCKER_IMAGE = "suryansh2004/node-app"
     }
     stages {
+        stage('Test') {
+            steps {
+                sh 'echo $PATH'
+                sh 'which docker'
+            }
+        }
         stage('Checkout') {
             steps {
                 git credentialsId: 'github-credentials', url: 'https://github.com/suryansh2004/currencyConverter.git', branch: 'main'
