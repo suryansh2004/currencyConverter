@@ -12,15 +12,15 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE:$BUILD_NUMBER .'
+                sh '/usr/local/bin/docker build -t $DOCKER_IMAGE:$BUILD_NUMBER .'
             }
         }
         stage('Push to Docker Hub') {
             steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                sh 'docker push $DOCKER_IMAGE:$BUILD_NUMBER'
-                sh 'docker tag $DOCKER_IMAGE:$BUILD_NUMBER $DOCKER_IMAGE:latest'
-                sh 'docker push $DOCKER_IMAGE:latest'
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | /usr/local/bin/docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                sh '/usr/local/bin/docker push $DOCKER_IMAGE:$BUILD_NUMBER'
+                sh '/usr/local/bin/docker tag $DOCKER_IMAGE:$BUILD_NUMBER $DOCKER_IMAGE:latest'
+                sh '/usr/local/bin/docker push $DOCKER_IMAGE:latest'
             }
         }
         stage('Deploy to Kubernetes') {
